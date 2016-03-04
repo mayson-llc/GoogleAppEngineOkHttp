@@ -1,2 +1,24 @@
-# Google App Engine generated folder
-appengine-generated/
+.classpath
+.project
+.settings
+eclipsebin
+
+bin
+gen
+build
+out
+lib
+
+target
+pom.xml.*
+release.properties
+
+.idea
+*.iml
+*.ipr
+*.iws
+classes
+
+obj
+
+.DS_Store
