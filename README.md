@@ -3,6 +3,10 @@ An implementation of the OkHttp3 __Call__ interface that allows OkHttp to be use
 
 I've tested this library against OkHttp 3.0.1 and with Retrofit 2.0.0-beta4 running on Google App Engine SDK 1.9.30.
 
++ [https://github.com/square/okhttp](https://github.com/square/okhttp)
++ [https://github.com/square/retrofit](https://github.com/square/retrofit)
++ [https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Java](https://cloud.google.com/appengine/downloads#Google_App_Engine_SDK_for_Java)
+
 ## Usage
     return new Retrofit.Builder()
         .baseUrl("http://api.example.com/")
