@@ -21,9 +21,10 @@ I've tested this library against OkHttp 3.0.1 and with Retrofit 2.0.0-beta4 runn
 ## Roadmap
 + Support for other HTTP Methods (e.g. DELETE, PUT, PATCH).
 + Support for binary responses.
++ Upload into jcenter for inclusion in Gradle builds.
 
 ## Gotchas
-+ Call.enqueue() will throw a Runtime Exception, on App Engine you should be using Tasks and Queues to perform Async calls. Use these with the Call.execute() method instead.
++ Call.enqueue() will throw a RuntimeException, on App Engine you should be using Tasks and Queues to perform Async calls. Use these with the Call.execute() method instead.
 
 ## Pull Requests
 In order to make this library more useful I welcome pull requests with new features 
