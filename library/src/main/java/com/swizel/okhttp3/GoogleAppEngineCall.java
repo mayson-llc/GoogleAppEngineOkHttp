@@ -1,13 +1,14 @@
 package com.swizel.okhttp3;
 
 import okhttp3.*;
+import okhttp3.internal.http.HttpMethod;
 import okio.Buffer;
+import okio.BufferedSource;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.Charset;
 
 /**
  * Created by Andy on 4/03/2016.
@@ -15,6 +16,22 @@ import java.nio.charset.Charset;
 public class GoogleAppEngineCall implements Call {
 
     private static final String NO_ASYNC_MESSAGE = "Async callbacks should be performed using tasks/queues on App Engine along with the execute() instead of enqueue() method.";
+    private static final ResponseBody EMPTY_BODY = new ResponseBody() {
+        @Override
+        public MediaType contentType() {
+            return null;
+        }
+
+        @Override
+        public long contentLength() {
+            return 0;
+        }
+
+        @Override
+        public BufferedSource source() {
+            return new Buffer();
+        }
+    };
     private Request mRequest;
     private boolean mExecuted = false;
     private boolean mCancelled = false;
@@ -36,19 +53,40 @@ public class GoogleAppEngineCall implements Call {
             }
             mExecuted = true;
         }
+        if ("GET".equalsIgnoreCase(mRequest.method()) ||
+                "DELETE".equalsIgnoreCase(mRequest.method()) ||
+                "POST".equalsIgnoreCase(mRequest.method()) ||
+                "PUT".equalsIgnoreCase(mRequest.method())) {
 
-        Response.Builder builder;
-        if ("GET".equalsIgnoreCase(mRequest.method())) {
-            builder = sendGet(mRequest);
+            URL url = new URL(mRequest.url().url().toString());
+            HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-        } else if ("POST".equalsIgnoreCase(mRequest.method())) {
-            builder = sendPost(mRequest);
+            con.setRequestMethod(mRequest.method());
+
+            setHttpsHeader(mRequest, url, con);
+
+            setHeaders(mRequest, con);
+
+            // Send body if we're required to do so.
+            if (HttpMethod.requiresRequestBody(mRequest.method()) && mRequest.body().contentLength() > 0) {
+
+                Buffer payload = new Buffer();
+                mRequest.body().writeTo(payload);
+
+                con.setDoOutput(true);
+                DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+                wr.write(payload.readByteArray());
+                wr.flush();
+                wr.close();
+            }
+
+            Response.Builder builder = parseResponse(con);
+            return builder.build();
 
         } else {
             throw new RuntimeException("Unsupported HTTP method : " + mRequest.method());
-        }
 
-        return builder.build();
+        }
     }
 
     @Override
@@ -71,48 +109,6 @@ public class GoogleAppEngineCall implements Call {
         return mCancelled;
     }
 
-    private Response.Builder sendGet(Request request) throws IOException {
-
-        String url = request.url().url().toString();
-
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        con.setRequestMethod("GET");
-
-        applySSLFix(request, obj, con);
-
-        setHeaders(request, con);
-
-        return parseResponse(con);
-    }
-
-    private Response.Builder sendPost(Request request) throws IOException {
-
-        String url = request.url().url().toString();
-
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        con.setRequestMethod("POST");
-
-        applySSLFix(request, obj, con);
-
-        setHeaders(request, con);
-
-        Buffer sink = new Buffer();
-        request.body().writeTo(sink);
-
-        // Send post request
-        con.setDoOutput(true);
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(sink.readString(Charset.forName("UTF-8")));
-        wr.flush();
-        wr.close();
-
-        return parseResponse(con);
-    }
-
     private void setHeaders(Request request, URLConnection con) {
         Headers headers = request.headers();
         for (String header : headers.names()) {
@@ -121,14 +117,10 @@ public class GoogleAppEngineCall implements Call {
         }
     }
 
-    /**
+    /*
      * HttpsUrlConnection isn't supported on App Engine, so add a new Header to fix that.
-     *
-     * @param request
-     * @param url
-     * @param connection
      */
-    private void applySSLFix(Request request, URL url, URLConnection connection) {
+    private void setHttpsHeader(Request request, URL url, URLConnection connection) {
         if (request.isHttps()) {
             int port = url.getPort();
             if (port == -1) {
@@ -146,17 +138,21 @@ public class GoogleAppEngineCall implements Call {
 
         InputStream in = connection.getInputStream();
         if (in != null) {
-            BufferedReader br = new BufferedReader(new InputStreamReader(in));
-            String inputLine;
-            StringBuilder response = new StringBuilder();
+            BufferedInputStream bis = new BufferedInputStream(in);
+            byte[] buffer = new byte[8192];
 
-            // FIXME: We can't assume all requests will return text, what about binary data?
-            while ((inputLine = br.readLine()) != null) {
-                response.append(inputLine);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+            int len = bis.read(buffer);
+            while (len != -1) {
+                baos.write(buffer, 0, len);
+                len = bis.read(buffer);
             }
             in.close();
 
-            builder.body(ResponseBody.create(MediaType.parse(connection.getContentType()), response.toString()));
+            builder.body(ResponseBody.create(MediaType.parse(connection.getContentType()), baos.toByteArray()));
+        } else {
+            builder.body(EMPTY_BODY);
         }
 
         return builder;

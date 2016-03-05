@@ -19,12 +19,11 @@ I've tested this library against OkHttp 3.0.1 and with Retrofit 2.0.0-beta4 runn
         .build();
 
 ## Features
-+ Supports GET and POST requests
++ Supports GET, POST, PUT and DELETE requests
 + Supports HTTP and HTTPS
++ Support for text and binary responses.
 
 ## Roadmap
-+ Support for other HTTP Methods (e.g. DELETE, PUT, PATCH).
-+ Support for binary responses.
 + Upload into jcenter for inclusion in Gradle builds.
 
 ## Gotchas
