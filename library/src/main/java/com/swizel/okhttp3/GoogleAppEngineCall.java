@@ -51,7 +51,7 @@ public class GoogleAppEngineCall implements Call {
     private boolean mExecuted = false;
     private boolean mCancelled = false;
 
-    GoogleAppEngineCall(Request request) {
+    public GoogleAppEngineCall(Request request) {
         mRequest = request;
     }
 
