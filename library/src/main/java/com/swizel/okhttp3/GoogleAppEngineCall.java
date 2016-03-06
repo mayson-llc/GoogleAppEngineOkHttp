@@ -1,3 +1,18 @@
+/*
+   Copyright 2016 Andrew Kelly
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.   
+ */
 package com.swizel.okhttp3;
 
 import okhttp3.*;
@@ -11,7 +26,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 /**
- * Created by Andy on 4/03/2016.
+ * An implementation of the OkHttp3 Call interface that allows OkHttp to be used on Google App Engine.
  */
 public class GoogleAppEngineCall implements Call {
 
@@ -63,9 +78,7 @@ public class GoogleAppEngineCall implements Call {
 
             con.setRequestMethod(mRequest.method());
 
-            setHttpsHeader(mRequest, url, con);
-
-            setHeaders(mRequest, con);
+            setHeaders(mRequest, url, con);
 
             // Send body if we're required to do so.
             if (HttpMethod.requiresRequestBody(mRequest.method()) && mRequest.body().contentLength() > 0) {
@@ -109,27 +122,23 @@ public class GoogleAppEngineCall implements Call {
         return mCancelled;
     }
 
-    private void setHeaders(Request request, URLConnection con) {
+    private void setHeaders(Request request, URL url, URLConnection con) {
         Headers headers = request.headers();
         for (String header : headers.names()) {
             // TODO: Support multiple values/header
             con.setRequestProperty(header, headers.get(header));
         }
-    }
 
-    /*
-     * HttpsUrlConnection isn't supported on App Engine, so add a new Header to fix that.
-     */
-    private void setHttpsHeader(Request request, URL url, URLConnection connection) {
+        // HttpsUrlConnection isn't supported on App Engine, so add a new Header to fix that.
         if (request.isHttps()) {
             int port = url.getPort();
             if (port == -1) {
                 port = 443;
             }
-            connection.setRequestProperty("Host", url.getHost() + ":" + port);
+            con.setRequestProperty("Host", url.getHost() + ":" + port);
         }
     }
-
+    
     private Response.Builder parseResponse(HttpURLConnection connection) throws IOException {
         Response.Builder builder = new Response.Builder();
         builder.request(request());
