@@ -71,12 +71,18 @@ public class GoogleAppEngineCall implements Call {
         if ("GET".equalsIgnoreCase(mRequest.method()) ||
                 "DELETE".equalsIgnoreCase(mRequest.method()) ||
                 "POST".equalsIgnoreCase(mRequest.method()) ||
+                "PATCH".equalsIgnoreCase(mRequest.method()) ||
                 "PUT".equalsIgnoreCase(mRequest.method())) {
 
             URL url = new URL(mRequest.url().url().toString());
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-            con.setRequestMethod(mRequest.method());
+            if ("PATCH".equals(mRequest.method())) {
+                con.setRequestProperty("X-HTTP-Method-Override", "PATCH");
+                con.setRequestMethod("POST");
+            } else {
+                con.setRequestMethod(mRequest.method());
+            }
 
             setHeaders(mRequest, url, con);
 
