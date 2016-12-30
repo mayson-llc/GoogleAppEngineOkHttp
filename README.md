@@ -1,7 +1,7 @@
 # GoogleAppEngineOkHttp
 An implementation of the OkHttp3 __Call__ interface that allows OkHttp to be used on Google App Engine. 
 
-I've tested this library against OkHttp 3.0.1 and with Retrofit 2.0.0-beta4 running on Google App Engine SDK 1.9.30.
+I've tested this library against OkHttp 3.3.1 and with Retrofit 2.0.2 running on Google App Engine SDK 1.9.48.
 
 + [https://github.com/square/okhttp](https://github.com/square/okhttp)
 + [https://github.com/square/retrofit](https://github.com/square/retrofit)
@@ -19,7 +19,7 @@ I've tested this library against OkHttp 3.0.1 and with Retrofit 2.0.0-beta4 runn
         .build();
 
 ## Features
-+ Supports GET, POST, PUT and DELETE requests
++ Supports GET, POST, PUT, PATCH and DELETE requests
 + Supports HTTP and HTTPS
 + Support for text and binary responses.
 
