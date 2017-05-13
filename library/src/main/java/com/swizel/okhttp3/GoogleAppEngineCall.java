@@ -1,5 +1,5 @@
 /*
-   Copyright 2016 Andrew Kelly
+   Copyright 2016-2017 Andrew Kelly
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -28,7 +28,7 @@ import java.net.URLConnection;
 /**
  * An implementation of the OkHttp3 Call interface that allows OkHttp to be used on Google App Engine.
  */
-public class GoogleAppEngineCall implements Call {
+class GoogleAppEngineCall implements Call {
 
     private static final String NO_ASYNC_MESSAGE = "Async callbacks should be performed using tasks/queues on App Engine along with the execute() instead of enqueue() method.";
     private static final ResponseBody EMPTY_BODY = new ResponseBody() {
@@ -51,7 +51,7 @@ public class GoogleAppEngineCall implements Call {
     private boolean mExecuted = false;
     private boolean mCancelled = false;
 
-    public GoogleAppEngineCall(Request request) {
+    GoogleAppEngineCall(Request request) {
         mRequest = request;
     }
 
@@ -126,6 +126,11 @@ public class GoogleAppEngineCall implements Call {
     @Override
     public boolean isCanceled() {
         return mCancelled;
+    }
+
+    @Override
+    public GoogleAppEngineCall clone() {
+        return new GoogleAppEngineCall(request());
     }
 
     private void setHeaders(Request request, URL url, URLConnection con) {
