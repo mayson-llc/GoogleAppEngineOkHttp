@@ -1,5 +1,5 @@
 # GoogleAppEngineOkHttp
-An implementation of the OkHttp3 __Call__ interface that allows OkHttp to be used on Google App Engine. 
+An implementation of the OkHttp3 __Call.Factory__ interface that allows OkHttp to be used on Google App Engine.
 
 I've tested this library against OkHttp 3.3.1 and with Retrofit 2.0.2 running on Google App Engine SDK 1.9.48.
 
@@ -10,12 +10,7 @@ I've tested this library against OkHttp 3.3.1 and with Retrofit 2.0.2 running on
 ## Usage
     return new Retrofit.Builder()
         .baseUrl("http://api.example.com/")
-        .callFactory(new Call.Factory() {
-            @Override
-            public Call newCall(Request request) {
-                return new GoogleAppEngineCall(request);
-            }
-        })
+        .callFactory(new GoogleAppEngineOkHttpClient())
         .build();
 
 ## Features
