@@ -155,6 +155,7 @@ class GoogleAppEngineCall implements Call {
         builder.request(request());
         builder.protocol(Protocol.HTTP_1_1);
         builder.code(connection.getResponseCode());
+        builder.message(String.valueOf(connection.getResponseMessage()));
 
         InputStream in = connection.getInputStream();
         if (in != null) {
