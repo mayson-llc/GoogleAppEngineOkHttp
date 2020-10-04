@@ -17,13 +17,16 @@ package com.swizel.okhttp3;
 
 import okhttp3.*;
 import okhttp3.internal.http.HttpMethod;
+import okio.AsyncTimeout;
 import okio.Buffer;
 import okio.BufferedSource;
+import okio.Timeout;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.concurrent.TimeUnit;
 
 /**
  * An implementation of the OkHttp3 Call interface that allows OkHttp to be used on Google App Engine.
@@ -179,4 +182,16 @@ class GoogleAppEngineCall implements Call {
         return builder;
     }
 
+    @Override
+    public Timeout timeout() {
+        final AsyncTimeout asyncTimeout = new AsyncTimeout() {
+            @Override
+            protected void timedOut() {
+                cancel();
+            }
+        };
+        // Configure the client's default timeout with OkHttpClient.Builder.callTimeout.
+        asyncTimeout.timeout(0, TimeUnit.SECONDS);
+        return asyncTimeout;
+    }
 }
