@@ -191,7 +191,7 @@ class GoogleAppEngineCall implements Call {
             }
         };
         // Configure the client's default timeout with OkHttpClient.Builder.callTimeout.
-        asyncTimeout.timeout(0, TimeUnit.SECONDS);
+        asyncTimeout.timeout(10, TimeUnit.SECONDS);
         return asyncTimeout;
     }
 }
